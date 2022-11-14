@@ -7,13 +7,14 @@ Extract Information on a Product's webpage, given the UPC of the corresponding p
 
 ## Prerequisites
 - python>=3.10.6
+- pip>=22.0
 
 ## Install
 - `git clone` this repository
 
 - Set environment variables
 
-- `pip3 install requirements.txt`
+- `pip install requirements.txt`
 
 ## Run Project
 - Run `python3 main.py <UPC>`
