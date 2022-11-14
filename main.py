@@ -1,25 +1,35 @@
-import re
+""" Scrape product webpage informtaion, given it's UPC"""
 import json
-import time
 import logging
-from post_requests import get_product_url
+import os
+import re
+import sys
+import time
+
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 
+from extract_url import get_product_url
+
 logging.basicConfig(level=logging.INFO)
+load_dotenv()
 
 
 def selenium_driver():
     options = webdriver.ChromeOptions()
-    options.binary_location = (
-        r"/Applications/Google Chrome 3.app/Contents/MacOS/Google Chrome"
+    options.binary_location = os.getenv("CHROMEBINARY")
+    driver = webdriver.Chrome(
+        service=Service(os.getenv("CHROMEDRIVER")), options=options
     )
-    driver = webdriver.Chrome(service=Service("../chromedriver"), options=options)
     return driver
 
 
-def get_webpage_source(upc):
+def get_webpage_soup():
+    upc = sys.argv[1]
+    logging.info("UPC: %s", upc)
+
     driver = selenium_driver()
     url = get_product_url(upc)
     driver.get(url)
@@ -29,18 +39,18 @@ def get_webpage_source(upc):
     return BeautifulSoup(html, "lxml")
 
 
-def get_webpage_data(upc):
-    soup = get_webpage_source(upc)
+def get_webpage_data():
+    soup = get_webpage_soup()
     scripts = soup.find_all("script", {"type": "text/javascript"})
     for script in scripts:
-        data = re.search("; jQuery.ajax\({*?(.*?)},[ ]{1,}success", str(script))
+        data = re.search(r"; jQuery.ajax\({*?(.*?)},[ ]{1,}success", str(script))
         if data:
             logging.info("Data found in HTML Response")
             data = data.group(1)
             data = data.split("postdata:")[1].strip()
             logging.info(data)
-            with open("data.json", "w+") as f_:
-                f_.write(str(data))
+            with open("data.json", "w+", encoding="utf-8") as file_:
+                file_.write(str(data))
             break
 
     json_data = json.loads(data)
@@ -66,4 +76,4 @@ def get_webpage_data(upc):
 
 
 if __name__ == "__main__":
-    get_webpage_data("B00C91Q86I")
+    get_webpage_data()
