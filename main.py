@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 
-from extract_url import get_product_url
+from utils.extract_url import get_product_url
 
 logging.basicConfig(level=logging.INFO)
 load_dotenv()
